@@ -12,7 +12,7 @@ var barColors = ["red", "green","blue","#2faf1a",
 function getValueYColumnChart() {
   axios({
       method: 'get',
-      url: `/api/v1/restaurant/chart/column-chart`,
+      url: `/api/v1/grade/chart/column-chart`,
   })
   .then(function (response) {
       yValues = response.data.map(i => {
@@ -55,7 +55,7 @@ var bar1Colors = [
 function getValue1LineChart() {
   axios({
       method: 'get',
-      url: `/api/v1/restaurant/chart/doughnut-chart`,
+      url: `/api/v1/grade/chart/doughnut-chart`,
   })
   .then(function (response) {
     y1Values = response.data.filter((i, index) => {

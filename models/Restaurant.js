@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Grade = require('./Grade')
 
 const RestaurantSchema = new mongoose.Schema({
     address: {
@@ -9,11 +10,6 @@ const RestaurantSchema = new mongoose.Schema({
     },
     borough: String,
     cuisine: String,
-    grades: [{
-        date: Date,
-        grade: String,
-        score: Number
-    }],
     name: String,
     restaurant_id: String
 })

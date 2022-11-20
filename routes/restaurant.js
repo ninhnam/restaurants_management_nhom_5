@@ -78,31 +78,6 @@ router.route('/get-a-restaurant/:restaurantId').get(async (req, res) => {
     }
 })
 
-router.route('/rated-restaurant/:restaurantId/:grate/:score').put(async (req, res) => {
-    try {
-        console.log(req.params.restaurantId, "-", req.params.grate, "-", req.params.score)
-        MongoClient.connect(url, function(err, db) {
-            if (err) throw err;
-            var dbo = db.db("reviews_db");
-            var myquery = { restaurant_id: req.params.restaurantId };
-            var newvalues = { $push: {
-                "grades" : {
-                   "date" : new Date(),
-                    "grade" :  req.params.grate,
-                    "score" : Number(req.params.score)
-                 }
-            } };
-            dbo.collection("restaurants").updateOne(myquery, newvalues, function(err, res) {
-                if (err) throw err;
-                console.log("1 document updated");
-                db.close();
-            });
-        });
-        res.send({msg: "updated success"});
-    } catch (error) {
-        res.send({msg: "not updated"});
-    }
-})
 
 router.route('/update-restaurant/:restaurantId').put(async (req, res) => {
     try {
@@ -203,60 +178,7 @@ router.route('/top3/best-rated-month').post(async (req, res) => {
       });
 })
 
-router.route('/chart/column-chart').get(async (req, res) => {
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("reviews_db");
-        dbo.collection("restaurants").aggregate([
-            {$unwind: "$grades"},
-            {
-                $project:
-                    {
-                    name: "$name", 
-                    cuisine: "$cuisine", 
-                    restaurant_id: "$restaurant_id", 
-                    address: "$address", 
-                    borough: "$borough", 
-                    grades: "$grades",
-                    month: { $month: "$grades.date" }
-                    }
-            },
-            {$group: {_id: { month: "$month"}, total: {$count: {}} }},
-            {$sort: {"_id.month":  1}},
-        ]).toArray(function(err, result) {
-            if (err) throw err;
-            res.send(result)
-            db.close();
-        });
-      });
-})
 
-router.route('/chart/doughnut-chart').get(async (req, res) => {
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("reviews_db");
-        dbo.collection("restaurants").aggregate([
-            {$unwind: "$grades"},
-            {
-                $project:
-                    {
-                    name: "$name", 
-                    cuisine: "$cuisine", 
-                    restaurant_id: "$restaurant_id", 
-                    address: "$address", 
-                    borough: "$borough", 
-                    grades: "$grades"
-                    }
-            },
-            {$group: {_id: { grades: "$grades.grade"}, total: {$count: {}} }},
-            {$sort: {"total": -1, "_id.grades":  1}},
-        ]).toArray(function(err, result) {
-            if (err) throw err;
-            res.send(result)
-            db.close();
-        });
-      });
-})
 
 
 

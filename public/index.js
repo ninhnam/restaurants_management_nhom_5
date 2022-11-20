@@ -105,13 +105,14 @@ document.querySelector('.rated-btn').addEventListener('click', function () {
 })
 
 function ratedFunc(id, grade, score) {
-  axios({
-        method: 'put',
-        url: `/api/v1/restaurant/rated-restaurant/${id}/${grade}/${score}`
+    axios({
+        method: 'post',
+        url: `/api/v1/grade/rated/${id}/${grade}/${score}`
     })
     .then(function (response) {
         console.log(response);
         alert("Đánh giá restaurant thành công")
+        location.reload();
     })
     .catch(function (error) {
         console.log(error);

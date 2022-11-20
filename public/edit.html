@@ -109,18 +109,7 @@
                       </td>
                     </tr>
                     <tr class="grade-show-tr">
-                        <th class="grade-row" rowspan="4">Grades</th>
-                        <td></td>
-                        <!-- <td class="grade-flex grade-1">
-                            <div>
-                                <strong>date</strong> : 2014-03-03 <br>
-                                <strong>grade</strong> : A <br>
-                                <strong>score</strong> : 2 <br>
-                            </div>
-                            <div>
-                                <button type="button" class="btn btn-danger">Delete</button>
-                            </div>
-                        </td> -->
+                        <th class="grade-row" rowspan="1000">Grades</th>
                     </tr>
                     <!-- insert grade -->
                     <!-- <tr>
@@ -167,11 +156,105 @@
         document.querySelector('#zipcode').value = data.address.zipcode
         document.querySelector('#coord1').value = Math.ceil(data.address.coord[0])
         document.querySelector('#coord2').value = Math.ceil(data.address.coord[1])
-        //grade show
+        
+      })
+    }
 
-        var grade_list = data.grades.map((item, index) => {
+    getRestaurant(myParam)
+
+    function delResGrade(id) {
+        let gradeId = document.querySelector(`[resId='${id}']`).getAttribute("gradeId")
+        arrayDelete.push(gradeId)
+        console.log(arrayDelete)
+        document.querySelector(`[resId='${id}']`).remove();
+    }
+
+    document.querySelector('#edit-a-restaurant').addEventListener('submit', function (e) {
+        e.preventDefault();
+        try {
+            const sortedArrayDelete = arrayDelete.sort((a, b) => {  
+                return b - a
+            })
+            sortedArrayDelete.forEach(item => {
+                listGrade.splice(item, 1)
+            })
+
+            var updateData = {
+                name: document.querySelector('#name').value,
+                cuisine: document.querySelector('#cuisine').value,
+                borough:  document.querySelector('#borough').value,
+                address: {
+                    building : document.querySelector('#building').value,
+                    coord : [
+                        document.querySelector('#coord1').value,
+                        document.querySelector('#coord2').value
+                    ],
+                    street : document.querySelector('#street').value,
+                    zipcode : document.querySelector('#zipcode').value
+                }
+            }
+            
+            updateRating(arrayDelete)
+            putUpdateRestaurant(updateData)
+
+            // success 
+            var confirmSuccess = confirm("Cập nhật restaurant thành công, click OK để trở về trang chủ")
+            if(confirmSuccess) {
+                window.location.assign("/")
+            } else {
+                location.reload();
+            }
+        } catch (error) {
+            var confirmFailed = confirm("Cập nhật restaurant thất bại, click OK để trở về trang chủ")
+            if(confirmFailed) {
+                window.location.assign("/")
+            } else {
+                location.reload();
+            }
+        }
+    })
+
+    function putUpdateRestaurant(data) {
+        axios({
+            method: 'put',
+            url: `/api/v1/restaurant/update-restaurant/${myParam}`,
+            data: data
+        })
+        .then(function (response) {
+            console.log("restaurant update success");
+        })
+        .catch(function (error) {
+            console.log("restaurant update failed");
+            
+        });
+    }
+
+    function updateRating(data) {
+        axios({
+            method: 'put',
+            url: `/api/v1/grade/delete/listGrade`,
+            data: data
+        })
+        .then(function (response) {
+            console.log("grade update(delete) success");
+        })
+        .catch(function (error) {
+            console.log("grade update(delete) failed");
+        });
+    }
+
+    function getRating(id) {
+    axios({
+          method: 'get',
+          url: `/api/v1/grade/detail/${id}`
+      })
+      .then(function (response) {
+          console.log(response.data);
+          //grade show
+
+        var grade_list = response.data.map((item, index) => {
             return `
-                        <td resId="${index}" class="grade-flex grade-1">
+                        <td resId="${index}", gradeId="${item._id}" class="grade-flex grade-1">
                             <div>
                                 <strong>Date</strong> : ${item.date.split("T")[0]} <br>
                                 <strong>Grade</strong> : ${item.grade} <br>
@@ -185,74 +268,15 @@
         }).join(" ")
         
         document.querySelector('.grade-show-tr').innerHTML = `
-                    <th class="grade-row" rowspan="${data.grades.length}">Grades</th>
+                    <th class="grade-row" rowspan="1000">Grades</th>
                         ${grade_list}
         `
       })
-    }
-
-    getRestaurant(myParam)
-
-    function delResGrade(id) {
-        arrayDelete.push(id)
-        document.querySelector(`[resId='${id}']`).remove();
-    }
-
-    document.querySelector('#edit-a-restaurant').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const sortedArrayDelete = arrayDelete.sort((a, b) => {  
-            return b - a
-        })
-        sortedArrayDelete.forEach(item => {
-            listGrade.splice(item, 1)
-        })
-
-        listGrade.forEach(item => {
-            item.date = new Date(item.date)
-        })
-        var updateData = {
-            name: document.querySelector('#name').value,
-            cuisine: document.querySelector('#cuisine').value,
-            borough:  document.querySelector('#borough').value,
-            grades: listGrade,
-            address: {
-                building : document.querySelector('#building').value,
-                coord : [
-                    document.querySelector('#coord1').value,
-                    document.querySelector('#coord2').value
-                ],
-                street : document.querySelector('#street').value,
-                zipcode : document.querySelector('#zipcode').value
-            }
-        }
-        putUpdateRestaurant(updateData)
-    })
-
-    function putUpdateRestaurant(data) {
-        axios({
-            method: 'put',
-            url: `/api/v1/restaurant/update-restaurant/${myParam}`,
-            data: data
-        })
-        .then(function (response) {
-            console.log(response);
-            var confirmSuccess = confirm("Cập nhật restaurant thành công, click OK để trở về trang chủ")
-            if(confirmSuccess) {
-                window.location.assign("/")
-            } else {
-                location.reload();
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-            var confirmFailed = confirm("Cập nhật restaurant thất bại, click OK để trở về trang chủ")
-            if(confirmFailed) {
-                window.location.assign("/")
-            } else {
-                location.reload();
-            }
-        });
-    }
+      .catch(function (error) {
+          console.log(error);
+      });
+  }
+  getRating(myParam)
     
 </script>
 </html>

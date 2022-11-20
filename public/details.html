@@ -79,7 +79,7 @@
                     </tr>
                     <tr>
                         <th class="grade-row" rowspan="6">Grades</th>
-                        <td></td>
+                        <!-- <td></td> -->
                         <!-- <td>
                             <strong>Date</strong> : <span class="detail-restaurant-date0">2014-03-03</span> <br>
                             <strong>Grade</strong> : <span class="detail-restaurant-grade0">A</span> <br>
@@ -133,11 +133,12 @@
         newdate = date.slice(0, 10)
         return newdate
     }
-
+    
     function getRestaurant(id) {
-      fetch(`/api/v1/restaurant/get-a-restaurant/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
+        fetch(`/api/v1/restaurant/get-a-restaurant/${id}`)
+        .then((response) => response.json())
+        .then((data) => {
+        document.querySelector('.detail-restaurant-id').innerHTML = data.restaurant_id
         document.querySelector('.nav-restaurant-id').innerHTML = data.restaurant_id
         document.querySelector('.detail-restaurant-name').innerHTML = data.name
         document.querySelector('.detail-restaurant-cuisine').innerHTML = data.cuisine
@@ -148,32 +149,10 @@
         document.querySelector('.detail-restaurant-street').innerHTML = data.address.street
         document.querySelector('.detail-restaurant-zipcode').innerHTML = data.address.zipcode
 
-        document.querySelector('.detail-restaurant-date0').innerHTML = formatDate(data.grades[0].date)
-        document.querySelector('.detail-restaurant-grade0').innerHTML = data.grades[0].grade
-        document.querySelector('.detail-restaurant-score0').innerHTML = data.grades[0].score
-
-        document.querySelector('.grade-row').setAttribute('rowspan', data.grades.length)
-        
+        document.querySelector('.grade-row').setAttribute('rowspan', 1000)
         //rated name
         document.querySelector('.name-table-rated').innerHTML = data.name
         
-        var gradeHTML = data.grades.map((item, index) => {
-            if(index !== 0) {
-                return `
-                    <tr>
-                        <td>
-                            <strong>Date</strong> : ${formatDate(item.date)} <br>
-                            <strong>Grade</strong> : ${item.grade} <br>
-                            <strong>Score</strong> : ${item.score} <br>
-                        </td>
-                    </tr>
-            `
-            }
-        }).join('')
-
-        var table_detail_html = document.querySelector('.table-detail').innerHTML
-        console.log(document.querySelector('.table-detail').innerHTML)   
-        document.querySelector('.table-detail').innerHTML = table_detail_html.concat(gradeHTML)
       });
     }
     getRestaurant(myParam)
@@ -214,8 +193,8 @@ function submitRated(id) {
   
   function ratedFunc(id, grade, score) {
     axios({
-          method: 'put',
-          url: `/api/v1/restaurant/rated-restaurant/${id}/${grade}/${score}`
+          method: 'post',
+          url: `/api/v1/grade/rated/${id}/${grade}/${score}`
       })
       .then(function (response) {
           console.log(response);
@@ -227,6 +206,35 @@ function submitRated(id) {
           alert("Đánh giá restaurant thất bại")
       });
   }
+
+  function getRating(id) {
+    axios({
+          method: 'get',
+          url: `/api/v1/grade/detail/${id}`
+      })
+      .then(function (response) {
+          console.log(response.data);
+
+          var gradeHTML = response.data.map((item, index) => {
+            return `
+                <tr>
+                    <td>
+                        <strong>Date</strong> : ${formatDate(item.date)} <br>
+                        <strong>Grade</strong> : ${item.grade} <br>
+                        <strong>Score</strong> : ${item.score} <br>
+                    </td>
+                </tr>
+            `
+        }).join('')
+
+        var table_detail_html = document.querySelector('.table-detail').innerHTML
+        document.querySelector('.table-detail').innerHTML = table_detail_html.concat(gradeHTML)
+      })
+      .catch(function (error) {
+          console.log(error);
+      });
+  }
+  getRating(myParam)
 
     
 </script>
